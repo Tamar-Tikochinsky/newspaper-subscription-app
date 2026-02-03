@@ -3,6 +3,7 @@ import express from 'express'
 import mongoose from 'mongoose'
 import connectDB from './config/db.js'
 import authRoutes from './routes/AuthRoute.js'
+import subscriptionRoutes from "./routes/SubscriptionRoute.js";
 
 const app = express()
 const PORT = process.env.PORT || 1234
@@ -11,6 +12,7 @@ connectDB()
 
 app.use(express.json())
 app.use('/api/auth', authRoutes)
+app.use("/subscriptions", subscriptionRoutes);
 
 app.get('/', (req, res) => {
   res.send('app is running')

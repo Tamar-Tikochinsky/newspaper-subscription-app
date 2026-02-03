@@ -21,7 +21,8 @@ export const login = async (req, res) => {
 
   const userInfo = {
     id: foundUser._id,
-    email: foundUser.email
+    email: foundUser.email,
+    
   }
 
   const accessToken = jwt.sign(
