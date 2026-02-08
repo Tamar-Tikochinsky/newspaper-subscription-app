@@ -1,4 +1,4 @@
-import { User, LoginRequest, RegisterRequest, AuthResponse, SubscriptionPlan } from '../types/models';
+import type { User, AuthResponse, SubscriptionPlan } from '../types/models';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:1234/api';
 
