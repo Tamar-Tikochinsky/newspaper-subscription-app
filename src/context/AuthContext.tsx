@@ -1,5 +1,6 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 import { User, PaymentMethod, SubscriptionPlan } from '../types/models';
+import { authApi } from '../services/api';
 
 interface AuthContextType {
   user: User | null;
@@ -17,32 +18,55 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
-  const [subscription, setSubscription] = useState<Subscription | null>(null);
+  const [subscription, setSubscription] = useState<SubscriptionPlan | null>(null);
   const [paymentMethod, setPaymentMethodState] = useState<PaymentMethod | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  const login = async (email: string, _password: string) => {
-    // TODO: Replace with actual API call
-    const mockUser: User = {
-      _id: '1',
-      fullName: 'משתמש',
-      email,
-      isAdmin: false,
+  // Check if user is already logged in on mount
+  React.useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const token = localStorage.getItem('accessToken');
+        if (token) {
+          const userData = await authApi.getCurrentUser();
+          setUser(userData);
+        }
+      } catch (error) {
+        console.error('Auth check failed:', error);
+        localStorage.removeItem('accessToken');
+      } finally {
+        setLoading(false);
+      }
     };
-    setUser(mockUser);
+    checkAuth();
+  }, []);
+
+  const login = async (email: string, password: string) => {
+    try {
+      const response = await authApi.login(email, password);
+      if (response.user) {
+        setUser(response.user);
+      }
+    } catch (error) {
+      console.error('Login failed:', error);
+      throw error;
+    }
   };
 
-  const register = async (fullName: string, email: string, _password: string) => {
-    // TODO: Replace with actual API call
-    const mockUser: User = {
-      _id: '1',
-      fullName,
-      email,
-      isAdmin: false,
-    };
-    setUser(mockUser);
+  const register = async (fullName: string, email: string, password: string) => {
+    try {
+      const response = await authApi.register(fullName, email, password);
+      if (response.user) {
+        setUser(response.user);
+      }
+    } catch (error) {
+      console.error('Register failed:', error);
+      throw error;
+    }
   };
 
   const logout = () => {
+    authApi.logout();
     setUser(null);
     setSubscription(null);
     setPaymentMethodState(null);
