@@ -1,5 +1,5 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { User, PaymentMethod, SubscriptionPlan } from '../types/models';
+import React, { createContext, useContext, useState } from 'react';
+import type { User, PaymentMethod, SubscriptionPlan } from '../types/models';
 import { authApi } from '../services/api';
 
 interface AuthContextType {
@@ -20,7 +20,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<User | null>(null);
   const [subscription, setSubscription] = useState<SubscriptionPlan | null>(null);
   const [paymentMethod, setPaymentMethodState] = useState<PaymentMethod | null>(null);
-  const [loading, setLoading] = useState(true);
 
   // Check if user is already logged in on mount
   React.useEffect(() => {
@@ -34,8 +33,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       } catch (error) {
         console.error('Auth check failed:', error);
         localStorage.removeItem('accessToken');
-      } finally {
-        setLoading(false);
       }
     };
     checkAuth();
