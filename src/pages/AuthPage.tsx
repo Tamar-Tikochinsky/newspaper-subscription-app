@@ -5,7 +5,7 @@ import { useAuth } from '../context/AuthContext';
 export const AuthPage: React.FC = () => {
   const [isLogin, setIsLogin] = useState(true);
   const [formData, setFormData] = useState({
-    name: '',
+    fullName: '',
     email: '',
     password: '',
     confirmPassword: '',
@@ -36,7 +36,7 @@ export const AuthPage: React.FC = () => {
           setLoading(false);
           return;
         }
-        await register(formData.name, formData.email, formData.password);
+        await register(formData.fullName, formData.email, formData.password);
       }
       navigate('/dashboard');
     } catch (err) {
@@ -70,8 +70,8 @@ export const AuthPage: React.FC = () => {
               </label>
               <input
                 type="text"
-                name="name"
-                value={formData.name}
+                name="fullName"
+                value={formData.fullName}
                 onChange={handleChange}
                 placeholder="הזן את שמך"
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent"
@@ -155,7 +155,7 @@ export const AuthPage: React.FC = () => {
               onClick={() => {
                 setIsLogin(!isLogin);
                 setError('');
-                setFormData({ name: '', email: '', password: '', confirmPassword: '' });
+                setFormData({ fullName: '', email: '', password: '', confirmPassword: '' });
               }}
               className="text-blue-600 hover:text-blue-800 font-medium"
             >

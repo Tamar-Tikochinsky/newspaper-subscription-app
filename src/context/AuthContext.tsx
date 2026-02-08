@@ -1,39 +1,16 @@
 import React, { createContext, useContext, useState } from 'react';
-
-interface User {
-  id: string;
-  email: string;
-  name: string;
-  role: 'user' | 'admin';
-}
-
-interface Subscription {
-  id: string;
-  plan: 'basic' | 'premium' | 'vip';
-  startDate: Date;
-  endDate: Date;
-  isActive: boolean;
-  autoRenew: boolean;
-}
-
-interface PaymentMethod {
-  id: string;
-  cardNumber: string;
-  cardName: string;
-  expiryDate: string;
-  isDefault: boolean;
-}
+import { User, PaymentMethod, SubscriptionPlan } from '../types/models';
 
 interface AuthContextType {
   user: User | null;
-  subscription: Subscription | null;
+  subscription: SubscriptionPlan | null;
   paymentMethod: PaymentMethod | null;
   isLoggedIn: boolean;
   login: (email: string, password: string) => Promise<void>;
-  register: (name: string, email: string, password: string) => Promise<void>;
+  register: (fullName: string, email: string, password: string) => Promise<void>;
   logout: () => void;
   updatePaymentMethod: (paymentMethod: PaymentMethod) => Promise<void>;
-  updateSubscription: (plan: 'basic' | 'premium' | 'vip') => Promise<void>;
+  updateSubscription: (subscriptionPlan: SubscriptionPlan) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -46,21 +23,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const login = async (email: string, _password: string) => {
     // TODO: Replace with actual API call
     const mockUser: User = {
-      id: '1',
+      _id: '1',
+      fullName: 'משתמש',
       email,
-      name: 'משתמש',
-      role: 'user',
+      isAdmin: false,
     };
     setUser(mockUser);
   };
 
-  const register = async (name: string, email: string, _password: string) => {
+  const register = async (fullName: string, email: string, _password: string) => {
     // TODO: Replace with actual API call
     const mockUser: User = {
-      id: '1',
+      _id: '1',
+      fullName,
       email,
-      name,
-      role: 'user',
+      isAdmin: false,
     };
     setUser(mockUser);
   };
@@ -76,17 +53,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setPaymentMethodState(method);
   };
 
-  const updateSubscription = async (plan: 'basic' | 'premium' | 'vip') => {
+  const updateSubscription = async (subscriptionPlan: SubscriptionPlan) => {
     // TODO: Replace with actual API call to update subscription
-    const newSubscription: Subscription = {
-      id: '1',
-      plan,
-      startDate: new Date(),
-      endDate: new Date(new Date().getTime() + 30 * 24 * 60 * 60 * 1000),
-      isActive: true,
-      autoRenew: true,
-    };
-    setSubscription(newSubscription);
+    setSubscription(subscriptionPlan);
   };
 
   return (

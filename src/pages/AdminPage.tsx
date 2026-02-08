@@ -1,28 +1,28 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { User } from '../types/models';
 
-interface User {
-  id: string;
-  name: string;
-  email: string;
+interface AdminUser extends User {
   status: 'active' | 'inactive';
   joinDate: string;
 }
 
 export const AdminPage: React.FC = () => {
   const navigate = useNavigate();
-  const [users, setUsers] = useState<User[]>([
+  const [users, setUsers] = useState<AdminUser[]>([
     {
-      id: '1',
-      name: 'דוד כהן',
+      _id: '1',
+      fullName: 'דוד כהן',
       email: 'david@example.com',
+      isAdmin: false,
       status: 'active',
       joinDate: '2025-01-15',
     },
     {
-      id: '2',
-      name: 'שרה ישראל',
+      _id: '2',
+      fullName: 'שרה ישראל',
       email: 'sarah@example.com',
+      isAdmin: false,
       status: 'active',
       joinDate: '2025-01-10',
     },
@@ -31,21 +31,22 @@ export const AdminPage: React.FC = () => {
   const [showAddUser, setShowAddUser] = useState(false);
   const [showChargeModal, setShowChargeModal] = useState(false);
   const [chargeAmount, setChargeAmount] = useState('');
-  const [newUser, setNewUser] = useState({ name: '', email: '', password: '' });
+  const [newUser, setNewUser] = useState({ fullName: '', email: '', password: '' });
 
   const handleAddUser = () => {
-    if (newUser.name && newUser.email && newUser.password) {
+    if (newUser.fullName && newUser.email && newUser.password) {
       setUsers([
         ...users,
         {
-          id: Date.now().toString(),
-          name: newUser.name,
+          _id: Date.now().toString(),
+          fullName: newUser.fullName,
           email: newUser.email,
+          isAdmin: false,
           status: 'active',
           joinDate: new Date().toISOString().split('T')[0],
         },
       ]);
-      setNewUser({ name: '', email: '', password: '' });
+      setNewUser({ fullName: '', email: '', password: '' });
       setShowAddUser(false);
     }
   };
@@ -120,8 +121,8 @@ export const AdminPage: React.FC = () => {
               </thead>
               <tbody>
                 {users.map(user => (
-                  <tr key={user.id} className="border-t border-gray-200 hover:bg-gray-50">
-                    <td className="px-6 py-4 text-sm text-gray-900">{user.name}</td>
+                  <tr key={user._id} className="border-t border-gray-200 hover:bg-gray-50">
+                    <td className="px-6 py-4 text-sm text-gray-900">{user.fullName}</td>
                     <td className="px-6 py-4 text-sm text-gray-900">{user.email}</td>
                     <td className="px-6 py-4 text-sm text-gray-900">{user.joinDate}</td>
                     <td className="px-6 py-4">
@@ -134,7 +135,7 @@ export const AdminPage: React.FC = () => {
                         ✏️ עריכה
                       </button>
                       <button
-                        onClick={() => handleDeleteUser(user.id)}
+                        onClick={() => handleDeleteUser(user._id!)}
                         className="text-red-600 hover:text-red-800 font-medium"
                       >
                         🗑️ מחיקה
@@ -160,8 +161,8 @@ export const AdminPage: React.FC = () => {
                   </label>
                   <input
                     type="text"
-                    value={newUser.name}
-                    onChange={e => setNewUser({ ...newUser, name: e.target.value })}
+                    value={newUser.fullName}
+                    onChange={e => setNewUser({ ...newUser, fullName: e.target.value })}
                     placeholder="הזן שם משתמש"
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent"
                   />
