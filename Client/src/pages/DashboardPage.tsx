@@ -1,17 +1,72 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import type { PaymentMethod } from '../types/models';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
 export const DashboardPage: React.FC = () => {
-  const { user, logout } = useAuth();
+  const { user, logout, paymentMethod, updatePaymentMethod } = useAuth();
   const navigate = useNavigate();
   const [showMenu, setShowMenu] = useState(false);
   const [activeTab, setActiveTab] = useState('profile');
+  const [payments, setPayments] = useState<any[]>([]);
+  const [loadingPayments, setLoadingPayments] = useState(false);
+  const [cardForm, setCardForm] = useState<PaymentMethod>({
+    cardNumber: paymentMethod?.cardNumber || '',
+    cardName: paymentMethod?.cardName || user?.fullName || '',
+    expiryDate: paymentMethod?.expiryDate || '',
+    cvv: paymentMethod?.cvv || '',
+  });
+  const [cardSaved, setCardSaved] = useState(false);
 
   const handleLogout = () => {
     logout();
     navigate('/');
   };
+
+  useEffect(() => {
+    if (paymentMethod) {
+      setCardForm({
+        cardNumber: paymentMethod.cardNumber,
+        cardName: paymentMethod.cardName,
+        expiryDate: paymentMethod.expiryDate,
+        cvv: paymentMethod.cvv || '',
+      });
+    } else {
+      setCardForm((prev) => ({
+        ...prev,
+        cardName: user?.fullName || '',
+      }));
+    }
+  }, [paymentMethod, user?.fullName]);
+
+  const handleCardChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setCardForm((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSaveCard = async () => {
+    setCardSaved(false);
+    await updatePaymentMethod(cardForm);
+    setCardSaved(true);
+    setTimeout(() => setCardSaved(false), 2500);
+  };
+
+  // load payments when billing tab is activated
+  React.useEffect(() => {
+    const load = async () => {
+      if (activeTab !== 'billing') return;
+      setLoadingPayments(true);
+      try {
+        const data = await (await import('../services/api')).paymentApi.getMyPayments();
+        setPayments(data);
+      } catch (err) {
+        console.error('failed to load payments', err);
+      } finally {
+        setLoadingPayments(false);
+      }
+    };
+    load();
+  }, [activeTab]);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -104,7 +159,7 @@ export const DashboardPage: React.FC = () => {
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">שם</label>
                     <div className="px-4 py-2 bg-gray-50 rounded-lg text-gray-700">
-                      {user?.name}
+                      {user?.fullName}
                     </div>
                   </div>
                   <div>
@@ -162,7 +217,19 @@ export const DashboardPage: React.FC = () => {
                   </div>
                   <div className="space-y-3 text-sm text-gray-700 mb-4">
                     <p>💰 ₪79 לחודש</p>
-                    <p>📅 מחודש הבא: {new Date(new Date().getTime() + 30 * 24 * 60 * 60 * 1000).toLocaleDateString('he-IL')}</p>
+                    {user?.subscriptionStart && (
+                      <p>
+                        📅 התחלת מנוי: {new Date(user.subscriptionStart).toLocaleDateString('he-IL')}
+                      </p>
+                    )}
+                    {user?.subscriptionEnd && (
+                      <p>
+                        📅 תאריך סיום: {new Date(user.subscriptionEnd).toLocaleDateString('he-IL')}
+                      </p>
+                    )}
+                    {!user?.subscriptionStart && (
+                      <p>📅 אין מנוי פעיל</p>
+                    )}
                   </div>
                   <button className="w-full text-red-600 hover:bg-red-50 py-2 px-4 rounded-lg transition border border-red-300">
                     ❌ ביטול מנוי
@@ -203,15 +270,19 @@ export const DashboardPage: React.FC = () => {
                 
                 <div className="bg-gradient-to-r from-cyan-600 to-purple-600 rounded-lg p-8 text-white mb-8">
                   <p className="text-sm opacity-75 mb-2">מספר כרטיס</p>
-                  <p className="text-2xl font-bold mb-8">•••• •••• •••• 4242</p>
+                  <p className="text-2xl font-bold mb-8">
+                    {cardForm.cardNumber
+                      ? `•••• •••• •••• ${cardForm.cardNumber.replace(/\s/g, '').slice(-4)}`
+                      : 'אין פרטי אשראי שמורים'}
+                  </p>
                   <div className="flex justify-between items-end">
                     <div>
                       <p className="text-xs opacity-75 mb-1">בעל הכרטיס</p>
-                      <p className="font-semibold">{user?.name}</p>
+                      <p className="font-semibold">{cardForm.cardName || user?.fullName || 'לא צויין'}</p>
                     </div>
                     <div className="text-right">
                       <p className="text-xs opacity-75 mb-1">תוקף</p>
-                      <p className="font-semibold">12/26</p>
+                      <p className="font-semibold">{cardForm.expiryDate || '--/--'}</p>
                     </div>
                   </div>
                 </div>
@@ -223,7 +294,21 @@ export const DashboardPage: React.FC = () => {
                       <label className="block text-sm font-medium text-gray-700 mb-2">מספר כרטיס</label>
                       <input
                         type="text"
+                        name="cardNumber"
+                        value={cardForm.cardNumber}
+                        onChange={handleCardChange}
                         placeholder="1234 5678 9012 3456"
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 outline-none"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">שם על הכרטיס</label>
+                      <input
+                        type="text"
+                        name="cardName"
+                        value={cardForm.cardName}
+                        onChange={handleCardChange}
+                        placeholder="שם בעל הכרטיס"
                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 outline-none"
                       />
                     </div>
@@ -232,6 +317,9 @@ export const DashboardPage: React.FC = () => {
                         <label className="block text-sm font-medium text-gray-700 mb-2">תוקף</label>
                         <input
                           type="text"
+                          name="expiryDate"
+                          value={cardForm.expiryDate}
+                          onChange={handleCardChange}
                           placeholder="MM/YY"
                           className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 outline-none"
                         />
@@ -240,17 +328,23 @@ export const DashboardPage: React.FC = () => {
                         <label className="block text-sm font-medium text-gray-700 mb-2">CVV</label>
                         <input
                           type="text"
+                          name="cvv"
+                          value={cardForm.cvv}
+                          onChange={handleCardChange}
                           placeholder="123"
                           className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 outline-none"
                         />
                       </div>
                     </div>
                     <button
-                      onClick={() => navigate('/payment')}
+                      onClick={handleSaveCard}
                       className="w-full bg-gradient-to-r from-cyan-600 to-purple-600 hover:from-cyan-700 hover:to-purple-700 text-white font-bold py-2 px-4 rounded-lg transition duration-200"
                     >
                       💾 שמור כרטיס
                     </button>
+                    {cardSaved && (
+                      <p className="mt-3 text-sm text-green-700">פרטי האשראי נשמרו בהצלחה</p>
+                    )}
                   </div>
                 </div>
               </div>
@@ -260,23 +354,26 @@ export const DashboardPage: React.FC = () => {
             <div>
               <div className="bg-white rounded-lg shadow-lg p-8">
                 <h3 className="text-lg font-bold text-gray-800 mb-4">📊 סיכום תשלומים</h3>
-                <div className="space-y-4 mb-6">
-                  <div className="flex justify-between py-2 border-b">
-                    <span className="text-gray-600">חודשי</span>
-                    <span className="font-semibold">₪79.00</span>
-                  </div>
-                  <div className="flex justify-between py-2 border-b">
-                    <span className="text-gray-600">מס</span>
-                    <span className="font-semibold">₪0.00</span>
-                  </div>
-                  <div className="flex justify-between py-2 bg-purple-50 px-2 rounded">
-                    <span className="text-gray-800 font-bold">סה"כ</span>
-                    <span className="text-purple-600 font-bold text-lg">₪79.00</span>
-                  </div>
-                </div>
-                <button className="w-full bg-gradient-to-r from-cyan-600 to-purple-600 hover:from-cyan-700 hover:to-purple-700 text-white font-bold py-2 px-4 rounded-lg transition duration-200">
-                  🧾 הדפס חשבונית
-                </button>
+                {loadingPayments ? (
+                  <p>טוען...</p>
+                ) : payments.length === 0 ? (
+                  <p className="text-gray-600">אין תשלומים להצגה עדיין</p>
+                ) : (
+                  <ul className="space-y-4 mb-6">
+                    {payments.map((p) => (
+                      <li key={p._id} className="flex justify-between">
+                        <span>{new Date(p.createdAt).toLocaleDateString('he-IL')}</span>
+                        <span className="font-semibold">₪{p.amount.toFixed(2)}</span>
+                        <span className="text-sm text-gray-500 capitalize">{p.status}</span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+                {payments.length > 0 && (
+                  <button className="w-full bg-gradient-to-r from-cyan-600 to-purple-600 hover:from-cyan-700 hover:to-purple-700 text-white font-bold py-2 px-4 rounded-lg transition duration-200">
+                    🧾 הדפס חשבונית
+                  </button>
+                )}
               </div>
             </div>
           </div>

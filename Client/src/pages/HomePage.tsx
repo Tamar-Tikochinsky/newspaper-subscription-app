@@ -46,11 +46,32 @@ export default function HomePage() {
       {/* Hero Section */}
       <section className="bg-gradient-to-r from-cyan-600 via-purple-600 to-cyan-600 text-white py-20 px-4 sm:px-6 lg:px-8">
         <div className="max-w-4xl mx-auto text-center">
-          <h1 className="text-5xl font-bold mb-6">
+          {/* <h1 className="text-5xl font-bold mb-6">
             הישארו מעודכנים בחדשות
-          </h1>
+          </h1> */}
           <p className="text-xl text-cyan-100 mb-8">
-            קרא את החדשות העדכניות ביותר מכל העולם במקום אחד
+           שידוכים, בריאות, עתיד...
+
+הסכרת מזמנת מטבעה חששות ודאגות לעתיד, 
+
+אבל לפני שנכנעים אליהם, חכו: 
+
+יש המון מתנות נדירות שהקב"ה נתן יחד עם הסכרת. 
+
+ההתמודדות הזו יכולה להצמיח, 
+
+לגדל, 
+
+ובדיוק בשביל זה הקמנו את המגזין שלנו. 
+
+כדי לתת כח, (וגם שמחה! ולא רק באדר!)
+
+כי לעזור לכם לסחוט את הלימון עד הסוף.
+
+וגם כדי להצחיק אתכם ולתת לכם לקרוא חומר מרתק ברמה גבוהה...
+
+בעיתון תמצאו מגוון רחב של תכנים:
+מידע פרקטי להורים, מדורי הלכה לגברים, טורים מעוררי מחשבה ומחזקי רוח, סאטירה, הומור (בדיחות שרק אנחנו מבינים), סיפורים, הפעלות, כלים פסיכולוגיים להתמודדות מאוזנת, מתכונים, חידות לילדים ועוד.
           </p>
           <button
             onClick={() => navigate('/signup')}
@@ -94,10 +115,10 @@ export default function HomePage() {
             <div className="bg-gradient-to-br from-yellow-50 to-amber-50 rounded-lg p-6 border-2 border-amber-500 hover:shadow-lg transition">
               <div className="text-3xl mb-4">⭐</div>
               <h3 className="text-xl font-bold text-amber-700 mb-3">
-                תוכן בחר
+               מידע אמין
               </h3>
               <p className="text-gray-700">
-                בחר את הנושאים שמעניינים אותך וקבל חדשות מותאמות אישית
+              כל המידע מאנשים סוכרתיים שמתמודדים כמוכם
               </p>
             </div>
           </div>
@@ -123,16 +144,16 @@ export default function HomePage() {
               <ul className="space-y-3 mb-8 text-gray-700">
                 <li className="flex items-center">
                   <span className="text-cyan-600 font-bold mr-2">✓</span>
-                  קריאת כתבות חדשות
+                קבלת העיתון במייל ישר כשיוצא גליון חדש
                 </li>
-                <li className="flex items-center">
+                {/* <li className="flex items-center">
                   <span className="text-cyan-600 font-bold mr-2">✓</span>
                   חדשות בעברית
                 </li>
                 <li className="flex items-center">
                   <span className="text-cyan-600 font-bold mr-2">✓</span>
                   דוא"ל יומי
-                </li>
+                </li> */}
               </ul>
               <button
                 onClick={() => navigate('/signup')}
@@ -157,9 +178,9 @@ export default function HomePage() {
               <ul className="space-y-3 mb-8 text-gray-700">
                 <li className="flex items-center">
                   <span className="text-purple-600 font-bold mr-2">✓</span>
-                  כל היתרונות של בסיסי
+                 קבלת העיתון עד הבית
                 </li>
-                <li className="flex items-center">
+                {/* <li className="flex items-center">
                   <span className="text-purple-600 font-bold mr-2">✓</span>
                   גישה לאפליקציה
                 </li>
@@ -170,7 +191,7 @@ export default function HomePage() {
                 <li className="flex items-center">
                   <span className="text-purple-600 font-bold mr-2">✓</span>
                   אחסון כתבות לקריאה מאוחרת
-                </li>
+                </li> */}
               </ul>
               <button
                 onClick={() => navigate('/signup')}

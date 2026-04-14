@@ -1,32 +1,41 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { User } from '../types/models';
+import type { User } from '../types/models';
 
 interface AdminUser extends User {
   status: 'active' | 'inactive';
   joinDate: string;
+  subscriptionStart?: Date;
+  subscriptionEnd?: Date;
 }
 
 export const AdminPage: React.FC = () => {
   const navigate = useNavigate();
-  const [users, setUsers] = useState<AdminUser[]>([
-    {
-      _id: '1',
-      fullName: 'דוד כהן',
-      email: 'david@example.com',
-      isAdmin: false,
-      status: 'active',
-      joinDate: '2025-01-15',
-    },
-    {
-      _id: '2',
-      fullName: 'שרה ישראל',
-      email: 'sarah@example.com',
-      isAdmin: false,
-      status: 'active',
-      joinDate: '2025-01-10',
-    },
-  ]);
+  const [users, setUsers] = useState<AdminUser[]>([]);
+
+  // load users from API on mount
+  React.useEffect(() => {
+    const load = async () => {
+      try {
+        const all = await (await import('../services/api')).userApi.getAll();
+        // map backend user shape to AdminUser
+        const mapped: AdminUser[] = all.map(u => ({
+          _id: u._id || u.id || '',
+          fullName: u.fullName,
+          email: u.email,
+          isAdmin: u.isAdmin,
+          status: u.subscriptionEnd && new Date(u.subscriptionEnd) > new Date() ? 'active' : 'inactive',
+          joinDate: u.createdAt ? new Date(u.createdAt).toISOString().split('T')[0] : '',
+          subscriptionStart: u.subscriptionStart as any,
+          subscriptionEnd: u.subscriptionEnd as any,
+        }));
+        setUsers(mapped);
+      } catch (err) {
+        console.error('failed to load users', err);
+      }
+    };
+    load();
+  }, []);
 
   const [showAddUser, setShowAddUser] = useState(false);
   const [showChargeModal, setShowChargeModal] = useState(false);
@@ -51,9 +60,20 @@ export const AdminPage: React.FC = () => {
     }
   };
 
-  const handleDeleteUser = (id: string) => {
+  const handleDeleteUser = async (id: string) => {
     if (confirm('האם אתה בטוח שברצונך למחוק משתמש זה?')) {
-      setUsers(users.filter(u => u.id !== id));
+      try {
+        await (await import('../services/api')).userApi.delete(id);
+        setUsers(users.filter(u => u._id !== id));
+      } catch (err) {
+        console.error('delete failed', err);
+      }
+    }
+  };
+
+  const handleCancelSubscription = async (_id: string) => {
+    if (confirm('האם אתה רוצה לבטל את המנוי של משתמש זה?')) {
+      alert('בשרת זה הפונקציה לביטול מנוי אינה נתמכת דרך ה-API הנוכחי.');
     }
   };
 
@@ -116,6 +136,8 @@ export const AdminPage: React.FC = () => {
                   <th className="px-6 py-3 text-right text-sm font-medium text-gray-700">דוא"ל</th>
                   <th className="px-6 py-3 text-right text-sm font-medium text-gray-700">תאריך הצטרפות</th>
                   <th className="px-6 py-3 text-right text-sm font-medium text-gray-700">סטטוס</th>
+                  <th className="px-6 py-3 text-right text-sm font-medium text-gray-700">התחלת מנוי</th>
+                  <th className="px-6 py-3 text-right text-sm font-medium text-gray-700">סיום מנוי</th>
                   <th className="px-6 py-3 text-right text-sm font-medium text-gray-700">פעולות</th>
                 </tr>
               </thead>
@@ -130,10 +152,24 @@ export const AdminPage: React.FC = () => {
                         {user.status === 'active' ? '✅ פעיל' : '❌ לא פעיל'}
                       </span>
                     </td>
+                    <td className="px-6 py-4 text-sm">
+                      {user.subscriptionStart ? new Date(user.subscriptionStart).toLocaleDateString('he-IL') : '-'}
+                    </td>
+                    <td className="px-6 py-4 text-sm">
+                      {user.subscriptionEnd ? new Date(user.subscriptionEnd).toLocaleDateString('he-IL') : '-'}
+                    </td>
                     <td className="px-6 py-4 text-sm space-x-2">
                       <button className="text-blue-600 hover:text-blue-800 font-medium">
                         ✏️ עריכה
                       </button>
+                      {user.status === 'active' && (
+                        <button
+                          onClick={() => handleCancelSubscription(user._id!)}
+                          className="text-yellow-600 hover:text-yellow-800 font-medium mr-2"
+                        >
+                          ❌ בטל מנוי
+                        </button>
+                      )}
                       <button
                         onClick={() => handleDeleteUser(user._id!)}
                         className="text-red-600 hover:text-red-800 font-medium"

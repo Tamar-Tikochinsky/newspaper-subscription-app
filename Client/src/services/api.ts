@@ -1,6 +1,6 @@
 import type { User, AuthResponse, SubscriptionPlan } from '../types/models';
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:1234/api';
+// import.meta.env.VITE_API_URL || 
+const API_URL = 'http://localhost:5000/api';
 
 // Store token in localStorage
 const setToken = (token: string) => {
@@ -13,6 +13,23 @@ const getToken = (): string | null => {
 
 const clearToken = () => {
   localStorage.removeItem('accessToken');
+};
+
+const parseJwt = (token: string): any | null => {
+  try {
+    const base64Url = token.split('.')[1];
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const jsonPayload = decodeURIComponent(
+      atob(base64)
+        .split('')
+        .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+        .join('')
+    );
+    return JSON.parse(jsonPayload);
+  } catch (err) {
+    console.error('Failed to parse JWT in api helper:', err);
+    return null;
+  }
 };
 
 // API request helper with authorization
@@ -59,8 +76,12 @@ export const authApi = {
     return response;
   },
 
-  register: async (fullName: string, email: string, password: string): Promise<AuthResponse> => {
-    const response = await apiCall('/auth/register', 'POST', { fullName, email, password });
+  register: async (fullName: string, email: string, password: string, cardDetails?: any): Promise<AuthResponse> => {
+    const body: any = { fullName, email, password };
+    if (cardDetails) {
+      body.cardDetails = cardDetails;
+    }
+    const response = await apiCall('/auth/register', 'POST', body);
     if (response.accessToken) {
       setToken(response.accessToken);
     }
@@ -72,29 +93,66 @@ export const authApi = {
   },
 
   getCurrentUser: async (): Promise<User> => {
-    return apiCall('/auth/me', 'GET');
+    const token = getToken();
+    if (!token) {
+      throw new Error('No auth token available');
+    }
+    const payload = parseJwt(token);
+    if (!payload?.id && !payload?._id) {
+      throw new Error('Invalid auth token');
+    }
+    const userId = payload.id || payload._id;
+    return apiCall(`/user/${userId}`, 'GET');
   },
 };
 
 // Subscription API calls
 export const subscriptionApi = {
   getAll: async (): Promise<SubscriptionPlan[]> => {
-    return apiCall('/subscriptions', 'GET');
+    return apiCall('/subscription', 'GET');
   },
 
   getById: async (id: string): Promise<SubscriptionPlan> => {
-    return apiCall(`/subscriptions/${id}`, 'GET');
+    return apiCall(`/subscription/${id}`, 'GET');
   },
 
   create: async (plan: Partial<SubscriptionPlan>): Promise<SubscriptionPlan> => {
-    return apiCall('/subscriptions', 'POST', plan);
+    return apiCall('/subscription', 'POST', plan);
   },
 
   update: async (id: string, plan: Partial<SubscriptionPlan>): Promise<SubscriptionPlan> => {
-    return apiCall(`/subscriptions/${id}`, 'PUT', plan);
+    return apiCall(`/subscription/${id}`, 'PUT', plan);
   },
 
   delete: async (id: string): Promise<void> => {
-    return apiCall(`/subscriptions/${id}`, 'DELETE');
+    return apiCall(`/subscription/${id}`, 'DELETE');
+  },
+};
+
+// User API for admin actions
+export const userApi = {
+  getAll: async (): Promise<User[]> => {
+    return apiCall('/user', 'GET');
+  },
+  cancelSubscription: async (_userId: string): Promise<void> => {
+    throw new Error('Cancel subscription is not supported by the server API');
+  },
+  delete: async (userId: string): Promise<void> => {
+    return apiCall(`/user/${userId}`, 'DELETE');
+  },
+};
+
+// Payment-related API calls
+export const paymentApi = {
+  getMyPayments: async (): Promise<any[]> => {
+    try {
+      return await apiCall('/payment/my', 'GET');
+    } catch (err) {
+      console.warn('paymentApi.getMyPayments: failed to fetch server history, returning empty array', err);
+      return [];
+    }
+  },
+  createSimple: async (subscriptionId: string, amount: number) => {
+    return apiCall('/payment/start', 'POST', { subscriptionId, amount });
   },
 };

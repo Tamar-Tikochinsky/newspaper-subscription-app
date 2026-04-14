@@ -9,6 +9,7 @@ export const AuthPage: React.FC = () => {
     email: '',
     password: '',
     confirmPassword: '',
+    idAdmin: false,
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -155,7 +156,7 @@ export const AuthPage: React.FC = () => {
               onClick={() => {
                 setIsLogin(!isLogin);
                 setError('');
-                setFormData({ fullName: '', email: '', password: '', confirmPassword: '' });
+                setFormData({ fullName: '', email: '', password: '', confirmPassword: '', idAdmin: false });
               }}
               className="text-blue-600 hover:text-blue-800 font-medium"
             >

@@ -29,6 +29,7 @@ export interface User {
   subscriptionEnd?: Date;
   createdAt?: Date;
   updatedAt?: Date;
+
 }
 
 // Auth Models
@@ -59,4 +60,15 @@ export interface PaymentMethod {
   cvv?: string;
   amount?: number;
   isDefault?: boolean;
+}
+
+export interface Payment {
+  _id?: string;
+  user: string;
+  suscription: string;
+  amount: number;
+  status: 'pending' | 'success' | 'failed';
+  billingType: 'immediate' | 'deferred';
+  createdAt?: Date;
+  updatedAt?: Date;
 }

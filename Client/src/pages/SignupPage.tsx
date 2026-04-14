@@ -50,7 +50,7 @@ export function SignupPage() {
       }
 
       await register(formData.name, formData.email, formData.password);
-      navigate('/payment');
+      navigate('/dashboard');
     } catch (err) {
       setError('שגיאה בהרשמה. אנא נסו שוב');
     } finally {
@@ -65,7 +65,8 @@ export function SignupPage() {
           הרשמה
         </h1>
         <p className="text-center text-gray-600 mb-6">
-          צרו חשבון חדש כדי להתחיל
+          צרו חשבון חדש כדי להתחיל.
+          לאחר ההרשמה, התחברו כדי להזין פרטי תשלום.
         </p>
 
         {error && (

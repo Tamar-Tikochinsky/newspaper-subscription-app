@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { paymentApi } from '../services/api';
 
 export const PaymentPage: React.FC = () => {
   const navigate = useNavigate();
@@ -8,7 +9,7 @@ export const PaymentPage: React.FC = () => {
 
   const [formData, setFormData] = useState({
     cardNumber: '',
-    cardName: user?.name || '',
+    cardName: user?.fullName || '',
     expiryDate: '',
     cvv: '',
     plan: 'premium',
@@ -40,7 +41,7 @@ export const PaymentPage: React.FC = () => {
     setFormData((prev) => ({ ...prev, [name]: v }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     // basic validation
@@ -50,11 +51,17 @@ export const PaymentPage: React.FC = () => {
     if (formData.cvv.length !== 3) return setError('CVV צריך להכיל 3 ספרות');
 
     setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
+    try {
+      // record a simple payment on the server so it can be shown in the dashboard
+      await paymentApi.createSimple(formData.plan, selectedPlan.price);
       setSuccess(true);
       setTimeout(() => navigate('/dashboard'), 2500);
-    }, 1500);
+    } catch (err: any) {
+      console.error(err);
+      setError('שגיאה בתשלום. נסה שוב');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (

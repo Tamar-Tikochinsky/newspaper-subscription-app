@@ -4,7 +4,14 @@ import { useAuth } from '../context/AuthContext';
 
 export function LoginPage() {
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { login, isLoggedIn } = useAuth();
+
+  // if already authenticated (or just logged in), go straight to dashboard
+  React.useEffect(() => {
+    if (isLoggedIn) {
+      navigate('/dashboard');
+    }
+  }, [isLoggedIn, navigate]);
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -29,7 +36,7 @@ export function LoginPage() {
         return;
       }
       await login(formData.email, formData.password);
-      navigate('/dashboard');
+      // navigation is handled by effect watching isLoggedIn
     } catch (err) {
       setError('שם משתמש או סיסמה שגויים');
     } finally {
