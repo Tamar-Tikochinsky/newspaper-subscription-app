@@ -9,9 +9,28 @@ interface AdminUser extends User {
   subscriptionEnd?: Date;
 }
 
+<<<<<<< HEAD
 export const AdminPage: React.FC = () => {
   const navigate = useNavigate();
   const [users, setUsers] = useState<AdminUser[]>([]);
+=======
+interface PaymentRecord {
+  _id: string;
+  user: { fullName: string; email: string };
+  amount: number;
+  status: string;
+  billingType: string;
+  createdAt: string;
+}
+
+export const AdminPage: React.FC = () => {
+  const navigate = useNavigate();
+  const [users, setUsers] = useState<AdminUser[]>([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [showPayments, setShowPayments] = useState(false);
+  const [payments, setPayments] = useState<PaymentRecord[]>([]);
+  const [loadingPayments, setLoadingPayments] = useState(false);
+>>>>>>> 89a7358 (AdminPage)
 
   // load users from API on mount
   React.useEffect(() => {
@@ -37,6 +56,44 @@ export const AdminPage: React.FC = () => {
     load();
   }, []);
 
+<<<<<<< HEAD
+=======
+  // Filter users based on search
+  const filteredUsers = users.filter(user => {
+    const query = searchQuery.toLowerCase();
+    return (
+      user.fullName?.toLowerCase().includes(query) ||
+      user.email?.toLowerCase().includes(query)
+    );
+  });
+
+  // Export emails to CSV
+  const exportEmailsToCSV = () => {
+    const emails = users.map(u => u.email).filter(Boolean);
+    const csvContent = 'דוא"ל\n' + emails.join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `emails_${new Date().toISOString().split('T')[0]}.csv`;
+    link.click();
+  };
+
+  // Load payment history
+  const loadPayments = async () => {
+    setLoadingPayments(true);
+    try {
+      const allPayments = await (await import('../services/api')).paymentApi.getAllPayments();
+      setPayments(allPayments);
+      setShowPayments(true);
+    } catch (err) {
+      console.error('failed to load payments', err);
+      alert('שגיאה בטעינת היסטוריית החיובים');
+    } finally {
+      setLoadingPayments(false);
+    }
+  };
+
+>>>>>>> 89a7358 (AdminPage)
   const [showAddUser, setShowAddUser] = useState(false);
   const [showChargeModal, setShowChargeModal] = useState(false);
   const [chargeAmount, setChargeAmount] = useState('');
@@ -105,7 +162,11 @@ export const AdminPage: React.FC = () => {
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Action Buttons */}
+<<<<<<< HEAD
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+=======
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8">
+>>>>>>> 89a7358 (AdminPage)
           <button
             onClick={() => setShowAddUser(true)}
             className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition duration-200 flex items-center justify-center gap-2"
@@ -118,6 +179,22 @@ export const AdminPage: React.FC = () => {
           >
             💰 גביית סכום מכל המנויים
           </button>
+<<<<<<< HEAD
+=======
+          <button
+            onClick={exportEmailsToCSV}
+            className="bg-yellow-600 hover:bg-yellow-700 text-white font-bold py-3 px-6 rounded-lg transition duration-200 flex items-center justify-center gap-2"
+          >
+            📧 יצוא מיילים ל-CSV
+          </button>
+          <button
+            onClick={loadPayments}
+            disabled={loadingPayments}
+            className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-lg transition duration-200 flex items-center justify-center gap-2 disabled:opacity-50"
+          >
+            📊 היסטוריית חיובים
+          </button>
+>>>>>>> 89a7358 (AdminPage)
           <div className="bg-purple-50 rounded-lg p-4 text-center">
             <p className="text-gray-600 text-sm">סך המשתמשים הפעילים</p>
             <p className="text-3xl font-bold text-purple-600">
@@ -126,6 +203,20 @@ export const AdminPage: React.FC = () => {
           </div>
         </div>
 
+<<<<<<< HEAD
+=======
+        {/* Search Bar */}
+        <div className="mb-6">
+          <input
+            type="text"
+            placeholder="🔍 חיפוש משתמש לפי שם או דוא&quot;ל..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-lg"
+          />
+        </div>
+
+>>>>>>> 89a7358 (AdminPage)
         {/* Users Table */}
         <div className="bg-white rounded-lg shadow-lg overflow-hidden">
           <div className="overflow-x-auto">
@@ -142,7 +233,11 @@ export const AdminPage: React.FC = () => {
                 </tr>
               </thead>
               <tbody>
+<<<<<<< HEAD
                 {users.map(user => (
+=======
+                {filteredUsers.map(user => (
+>>>>>>> 89a7358 (AdminPage)
                   <tr key={user._id} className="border-t border-gray-200 hover:bg-gray-50">
                     <td className="px-6 py-4 text-sm text-gray-900">{user.fullName}</td>
                     <td className="px-6 py-4 text-sm text-gray-900">{user.email}</td>
@@ -182,6 +277,14 @@ export const AdminPage: React.FC = () => {
               </tbody>
             </table>
           </div>
+<<<<<<< HEAD
+=======
+          {filteredUsers.length === 0 && (
+            <div className="p-8 text-center text-gray-500">
+              לא נמצאו משתמשים
+            </div>
+          )}
+>>>>>>> 89a7358 (AdminPage)
         </div>
 
         {/* Add User Modal */}
@@ -297,6 +400,78 @@ export const AdminPage: React.FC = () => {
             </div>
           </div>
         )}
+<<<<<<< HEAD
+=======
+
+        {/* Payments History Modal */}
+        {showPayments && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <div className="bg-white rounded-lg shadow-2xl p-8 w-full max-w-4xl max-h-[80vh] overflow-hidden flex flex-col">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-2xl font-bold text-gray-800">📊 היסטוריית חיובים</h2>
+                <button
+                  onClick={() => setShowPayments(false)}
+                  className="text-gray-500 hover:text-gray-700 text-2xl"
+                >
+                  ✕
+                </button>
+              </div>
+
+              <div className="overflow-auto flex-1">
+                <table className="w-full">
+                  <thead className="bg-gray-100 sticky top-0">
+                    <tr>
+                      <th className="px-4 py-3 text-right text-sm font-medium text-gray-700">תאריך</th>
+                      <th className="px-4 py-3 text-right text-sm font-medium text-gray-700">משתמש</th>
+                      <th className="px-4 py-3 text-right text-sm font-medium text-gray-700">דוא"ל</th>
+                      <th className="px-4 py-3 text-right text-sm font-medium text-gray-700">סכום</th>
+                      <th className="px-4 py-3 text-right text-sm font-medium text-gray-700">סוג חיוב</th>
+                      <th className="px-4 py-3 text-right text-sm font-medium text-gray-700">סטטוס</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {payments.map(payment => (
+                      <tr key={payment._id} className="border-t border-gray-200">
+                        <td className="px-4 py-3 text-sm text-gray-900">
+                          {payment.createdAt ? new Date(payment.createdAt).toLocaleDateString('he-IL') : '-'}
+                        </td>
+                        <td className="px-4 py-3 text-sm text-gray-900">
+                          {payment.user?.fullName || '-'}
+                        </td>
+                        <td className="px-4 py-3 text-sm text-gray-900">
+                          {payment.user?.email || '-'}
+                        </td>
+                        <td className="px-4 py-3 text-sm font-bold text-green-600">
+                          ₪{payment.amount}
+                        </td>
+                        <td className="px-4 py-3 text-sm text-gray-900">
+                          {payment.billingType === 'immediate' ? 'מיידי' : 'דחוי'}
+                        </td>
+                        <td className="px-4 py-3">
+                          <span className={`inline-block px-3 py-1 text-xs font-medium rounded-full ${
+                            payment.status === 'success' 
+                              ? 'text-green-700 bg-green-100' 
+                              : payment.status === 'failed'
+                              ? 'text-red-700 bg-red-100'
+                              : 'text-yellow-700 bg-yellow-100'
+                          }`}>
+                            {payment.status === 'success' ? '✅ הצליח' : payment.status === 'failed' ? '❌ נכשל' : '⏳ ממתין'}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+                {payments.length === 0 && (
+                  <div className="p-8 text-center text-gray-500">
+                    אין נתוני חיובים
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+>>>>>>> 89a7358 (AdminPage)
       </main>
     </div>
   );

@@ -8,9 +8,39 @@ import userRoute from "./routes/UserRoute.js"
 import paymentRoute from "./routes/PaymentRoute.js";
 import cors from 'cors';
 import corsOptions from "./config/corsOptions.js";
+import bcrypt from 'bcrypt';
+import User from './models/User.js';
 
 const app = express()
 const PORT = process.env.PORT || 1234
+
+// יצירת משתמש מנהל ראשי אם לא קיים
+const createAdminUser = async () => {
+  try {
+    const adminEmail = 'T@A.C';
+    const existingAdmin = await User.findOne({ email: adminEmail });
+    
+    if (!existingAdmin) {
+      const hashedPassword = await bcrypt.hash('123456', 10);
+      await User.create({
+        fullName: 'מנהל מערכת',
+        email: adminEmail,
+        password: hashedPassword,
+        isAdmin: true
+      });
+      console.log('✓ נוצר משתמש מנהל: T@A.C / 123456');
+    } else {
+      // עדכון isAdmin אם הוא לא מוגדר
+      if (!existingAdmin.isAdmin) {
+        existingAdmin.isAdmin = true;
+        await existingAdmin.save();
+        console.log('✓ עודכן משתמש קיים למנהל: T@A.C');
+      }
+    }
+  } catch (error) {
+    console.error('שגיאה ביצירת משתמש מנהל:', error);
+  }
+};
 
 connectDB()
 
@@ -27,6 +57,7 @@ app.get('/', (req, res) => {
 
 mongoose.connection.once('open', () => {
   console.log('connected to mongoDB')
+  createAdminUser(); // יצירת משתמש מנהל
   app.listen(PORT, () => {
     console.log(`server run on ${PORT}`)
   })

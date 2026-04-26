@@ -20,6 +20,7 @@ import {
   startPayment,
   cardcomCallback,
   getUserPayments,
+  getAllPayments,
   purchaseDeferredEdition,
   processBillingQueue,
   getEditionBillingStatusEndpoint,
@@ -41,5 +42,8 @@ router.post("/purchase/deferred", verifyJWT, purchaseDeferredEdition);
 router.post("/deferred/process", verifyJWT, verifyAdmin, processBillingQueue);
 router.get("/deferred/edition/:editionId/status", verifyJWT, verifyAdmin, getEditionBillingStatusEndpoint);
 router.post("/deferred/cancel", verifyJWT, verifyAdmin, cancelUserBillingCharges);
+
+// Admin: get all payments
+router.get("/all", verifyJWT, verifyAdmin, getAllPayments);
 
 export default router;

@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 
 export function LoginPage() {
   const navigate = useNavigate();
+<<<<<<< HEAD
   const { login, isLoggedIn } = useAuth();
 
   // if already authenticated (or just logged in), go straight to dashboard
@@ -12,6 +13,33 @@ export function LoginPage() {
       navigate('/dashboard');
     }
   }, [isLoggedIn, navigate]);
+=======
+  const { login, isLoggedIn, user } = useAuth();
+
+  // Helper to check if user is admin from token
+  const isAdminFromToken = (): boolean => {
+    try {
+      const token = localStorage.getItem('accessToken');
+      if (!token) return false;
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      return payload.isAdmin === true;
+    } catch {
+      return false;
+    }
+  };
+
+  // if already authenticated (or just logged in), go straight to dashboard or admin
+  React.useEffect(() => {
+    if (isLoggedIn) {
+      // Check isAdmin from token directly for immediate redirect
+      if (user?.isAdmin || isAdminFromToken()) {
+        navigate('/admin');
+      } else {
+        navigate('/dashboard');
+      }
+    }
+  }, [isLoggedIn, user, navigate]);
+>>>>>>> 89a7358 (AdminPage)
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);

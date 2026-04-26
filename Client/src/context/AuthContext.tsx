@@ -21,6 +21,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [subscription, setSubscription] = useState<SubscriptionPlan | null>(null);
   const [paymentMethod, setPaymentMethodState] = useState<PaymentMethod | null>(null);
 
+<<<<<<< HEAD
   const getCurrentUserId = (): string | null => {
     const token = localStorage.getItem('accessToken');
     if (!token) return null;
@@ -28,6 +29,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return payload?.id || payload?._id || null;
   };
 
+=======
+>>>>>>> 89a7358 (AdminPage)
   const loadSavedPaymentMethod = (userId: string): PaymentMethod | null => {
     try {
       const saved = localStorage.getItem(`paymentMethod_${userId}`);

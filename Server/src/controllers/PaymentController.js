@@ -77,6 +77,19 @@ export const getUserPayments = async (req, res) => {
   }
 };
 
+// Admin: get all payments with user details
+export const getAllPayments = async (req, res) => {
+  try {
+    if (!req.user?.isAdmin) return res.status(403).json({ message: "Admin required" });
+    const payments = await Payment.find()
+      .populate('user', 'fullName email')
+      .sort({ createdAt: -1 });
+    res.json(payments);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
 // ========== DEFERRED FLOW: called when a user purchases a deferred-edition
 export const purchaseDeferredEdition = async (req, res) => {
   try {
