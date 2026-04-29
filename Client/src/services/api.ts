@@ -155,4 +155,7 @@ export const paymentApi = {
   createSimple: async (subscriptionId: string, amount: number) => {
     return apiCall('/payment/start', 'POST', { subscriptionId, amount });
   },
+  getAllPayments: async (): Promise<any[]> => {
+    return apiCall('/payment/all', 'GET');
+  },
 };
