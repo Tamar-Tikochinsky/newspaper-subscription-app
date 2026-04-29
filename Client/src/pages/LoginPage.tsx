@@ -8,7 +8,7 @@ export function LoginPage() {
 
   // if already authenticated (or just logged in), go straight to dashboard
   React.useEffect(() => {
-    if(isLoggedIn&&user?.isAdmin) {
+    if(isLoggedIn && user?.isAdmin) {
       navigate('/admin');
     } else
     if (isLoggedIn) {
